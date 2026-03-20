@@ -41,6 +41,9 @@
                 </div>
                 <div class="recipe-actions">
                     <a href="/recipes/{{id}}" class="btn btn-sm">View Details</a>
+                    <form action="/recipes/{{id}}/delete" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete {{title}}?');">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
                 </div>
             </div>
             {{/each}}

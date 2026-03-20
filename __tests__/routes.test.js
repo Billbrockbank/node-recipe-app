@@ -64,4 +64,42 @@ describe('Routes', () => {
     expect(recipe).toBeDefined();
     expect(recipe.title).toBe(newRecipe.title);
   });
+
+  test('POST /recipes/:id/delete should delete a recipe', async () => {
+    // First, create a recipe to delete
+    const newRecipe = {
+      title: 'Recipe to Delete',
+      ingredients: 'Test ingredients',
+      method: 'Test method'
+    };
+
+    const createResponse = await request(app)
+      .post('/recipes')
+      .send(newRecipe);
+
+    // Get the recipe ID
+    const recipe = await db.get('SELECT * FROM recipes WHERE title = ?', [newRecipe.title]);
+    expect(recipe).toBeDefined();
+    const recipeId = recipe.id;
+
+    // Delete the recipe
+    const deleteResponse = await request(app)
+      .post(`/recipes/${recipeId}/delete`);
+
+    expect(deleteResponse.status).toBe(302); // Redirect status
+    expect(deleteResponse.headers.location).toBe('/recipes');
+
+    // Verify recipe was deleted
+    const deletedRecipe = await db.get('SELECT * FROM recipes WHERE id = ?', [recipeId]);
+    expect(deletedRecipe).toBeUndefined();
+  });
+
+  test('POST /recipes/:id/delete should handle non-existent recipe', async () => {
+    const nonExistentId = 99999;
+    const deleteResponse = await request(app)
+      .post(`/recipes/${nonExistentId}/delete`);
+
+    expect(deleteResponse.status).toBe(302);
+    expect(deleteResponse.headers.location).toBe('/recipes');
+  });
 });
